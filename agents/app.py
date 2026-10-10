@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import streamlit as st
 from langchain_core.messages import HumanMessage
@@ -15,9 +16,9 @@ def get_graph():
     conn = sqlite3.connect("memory.db", check_same_thread=False)
     memory = SqliteSaver(conn)
     memory.setup()
-    return build_graph(checkpointer=memory)
+    return build_graph(checkpointer=memory), conn
 
-graph = get_graph()
+graph, _db_conn = get_graph()
 thread_config = {"configurable": {"thread_id": "default_session"}, "recursion_limit": 10}
 
 # ── Sidebar ─────────────────────────────────────────────────────────────────────
@@ -30,11 +31,17 @@ with st.sidebar:
     )
     st.divider()
     if st.button("🗑️ Xoá lịch sử chat"):
-        import os
-        for f in ["memory.db", "memory.db-shm", "memory.db-wal"]:
-            if os.path.exists(f):
-                os.remove(f)
+        # Đóng connection trước khi xoá file (tránh lỗi PermissionError trên Windows)
+        try:
+            _db_conn.close()
+        except Exception:
+            pass
         st.cache_resource.clear()
+        for f in ["memory.db", "memory.db-shm", "memory.db-wal"]:
+            try:
+                os.remove(f)
+            except FileNotFoundError:
+                pass
         st.rerun()
     st.caption("Dữ liệu lưu trên máy của bạn.")
 

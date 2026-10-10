@@ -1,0 +1,21 @@
+# Core
+langchain-core
+langchain
+langgraph
+langgraph-checkpoint-sqlite
+python-dotenv
+
+# LangChain providers
+langchain-google-genai
+langchain-openai
+langchain-anthropic
+langchain-groq
+langchain-ollama
+
+# Tools
+langchain-community
+langchain-experimental
+ddgs
+
+# Web UI
+streamlit
