@@ -74,6 +74,13 @@ for msg in history:
             st.markdown(f"**[{icon} {name.upper()}]**\n\n{msg.content}")
 
 # ── Ô nhập chat ─────────────────────────────────────────────────────────────────
+# Hiện lỗi từ lần chạy trước (nếu có) — giữ lại sau rerun để user kịp đọc
+if st.session_state.get("last_error"):
+    st.error(f"❌ Có lỗi xảy ra: {st.session_state['last_error']}")
+    if st.button("Đã hiểu, xoá thông báo lỗi"):
+        st.session_state["last_error"] = None
+        st.rerun()
+
 if prompt := st.chat_input("Nhập câu hỏi hoặc yêu cầu..."):
 
     # Thêm tiền tố nếu user ép chỉ định agent
@@ -93,7 +100,8 @@ if prompt := st.chat_input("Nhập câu hỏi hoặc yêu cầu..."):
                 config=thread_config,
             )
         except Exception as e:
-            st.error(f"❌ Có lỗi xảy ra: {e}")
+            # Lưu lỗi vào session để hiện cố định sau rerun (không bị mất)
+            st.session_state["last_error"] = str(e)
 
     # Rerun SAU KHI spinner kết thúc (không nằm trong with block)
     st.rerun()
